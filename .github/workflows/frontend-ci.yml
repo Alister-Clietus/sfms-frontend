@@ -1,0 +1,45 @@
+name: Frontend CI Pipeline
+
+on:
+  push:
+    branches: [ "main", "staging" ]
+  pull_request:
+    branches: [ "main", "staging" ]
+
+jobs:
+  build-test-lint:
+    name: Lint, Test, and Build (Node 20)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20.11.1
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.11.1'
+          cache: 'npm'
+          cache-dependency-path: './sfms-frontend/package-lock.json'
+
+      - name: Install Dependencies
+        working-directory: ./sfms-frontend
+        run: npm ci
+
+      - name: Vulnerability Scan (NPM Audit)
+        working-directory: ./sfms-frontend
+        # || true ensures it is non-blocking (warn only) for Day 2 per SEC-032
+        run: npm audit --audit-level=high || true
+
+      - name: Enforce Static Analysis (ESLint)
+        working-directory: ./sfms-frontend
+        # Requires 'ng lint' to be mapped to 'npm run lint' in package.json
+        run: npm run lint
+
+      - name: Run Headless Unit Tests
+        working-directory: ./sfms-frontend
+        run: npm run test -- --watch=false --browsers=ChromeHeadless
+
+      - name: Verify Production Build
+        working-directory: ./sfms-frontend
+        run: npm run build -- --configuration=production
