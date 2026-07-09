@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  # ---------------------------------------------
+  # PostgreSQL Database Service
+  # ---------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: sfms-postgres-dev
+    environment:
+      POSTGRES_DB: sfms_dev
+      POSTGRES_USER: sfms_user
+      POSTGRES_PASSWORD: sfms_password
+      TZ: UTC
+    ports:
+      - "5432:5432"
+    volumes:
+      - sfms-pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sfms_user -d sfms_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sfms-network
+
+  # ---------------------------------------------
+  # Spring Boot Backend Service
+  # ---------------------------------------------
+  backend:
+    build:
+      context: ./sfms-backend
+      dockerfile: Dockerfile
+    container_name: sfms-backend-dev
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      # Override the DB_HOST to point to the docker-compose service name
+      - DB_HOST=postgres
+      - DB_USER=sfms_user
+      - DB_PASSWORD=sfms_password
+      - TZ=UTC
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+    networks:
+      - sfms-network
+
+  # ---------------------------------------------
+  # Angular Frontend Service
+  # ---------------------------------------------
+  frontend:
+    build:
+      context: ./sfms-frontend
+      dockerfile: Dockerfile
+    container_name: sfms-frontend-dev
+    ports:
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - sfms-network
+
+volumes:
+  sfms-pgdata:
+    driver: local
+
+networks:
+  sfms-network:
+    driver: bridge
