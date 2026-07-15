@@ -1,29 +1,21 @@
 @use '@angular/material' as mat;
-@import 'assets/themes/sfms-theme';
+@use 'assets/themes/sfms-theme';
 
 @include mat.core();
 
-// Define palettes using the UI-DS-002 variables
-$sfms-primary-palette: mat.define-palette(mat.$blue-palette, 700);
-$sfms-accent-palette: mat.define-palette(mat.$pink-palette, A200, A100, A400);
-$sfms-warn-palette: mat.define-palette(mat.$red-palette);
-
-$sfms-theme: mat.define-light-theme((
-  color: (
-    primary: $sfms-primary-palette,
-    accent: $sfms-accent-palette,
-    warn: $sfms-warn-palette,
-  ),
-  typography: mat.define-typography-config(
-    $font-family: $sfms-font-family
-  )
-));
+$sfms-theme: mat.define-theme((color: (theme-type: light,
+        primary: mat.$blue-palette,
+        tertiary: mat.$violet-palette,
+      ),
+      typography: (brand-family: sfms-theme.$sfms-font-family,
+        plain-family: sfms-theme.$sfms-font-family )));
 
 @include mat.all-component-themes($sfms-theme);
 
-html, body { 
-  height: 100%; 
-  margin: 0; 
-  font-family: $sfms-font-family; 
-  background-color: $sfms-color-background;
+html,
+body {
+  height: 100%;
+  margin: 0;
+  font-family: sfms-theme.$sfms-font-family;
+  background-color: sfms-theme.$sfms-color-background;
 }

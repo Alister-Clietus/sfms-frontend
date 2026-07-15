@@ -22,5 +22,6 @@ export const appConfig: ApplicationConfig = {
     // provideHttpClient(withInterceptors([]))
     provideHttpClient(
       withInterceptors([apiInterceptor])
+    )
   ]
 };

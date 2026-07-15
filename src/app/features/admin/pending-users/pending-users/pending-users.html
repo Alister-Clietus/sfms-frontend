@@ -1,0 +1,63 @@
+<div class="admin-view-container">
+  <div class="view-header">
+    <h1>Pending User Approvals</h1>
+    <p class="subtitle">Assign roles to newly registered users to grant them system access.</p>
+  </div>
+
+  <mat-card class="table-card mat-elevation-z2">
+    @if (isLoading()) {
+      <div class="loading-shade">
+        <mat-icon class="spinner">autorenew</mat-icon>
+        <p>Loading users...</p>
+      </div>
+    } @else if (pendingUsers().length === 0) {
+      <div class="empty-state">
+        <mat-icon class="empty-icon" color="primary">verified_user</mat-icon>
+        <h3>All Caught Up!</h3>
+        <p>There are currently no users pending role assignment.</p>
+      </div>
+    } @else {
+      <table mat-table [dataSource]="pendingUsers()" class="full-width-table">
+        <ng-container matColumnDef="email">
+          <th mat-header-cell *matHeaderCellDef> Email Address </th>
+          <td mat-cell *matCellDef="let user"> {{ user.email }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="displayName">
+          <th mat-header-cell *matHeaderCellDef> Display Name </th>
+          <td mat-cell *matCellDef="let user"> {{ user.displayName || 'N/A' }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="createdAt">
+          <th mat-header-cell *matHeaderCellDef> Date Joined </th>
+          <td mat-cell *matCellDef="let user"> {{ user.createdAt | sfmsDate }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="action">
+          <th mat-header-cell *matHeaderCellDef> Assign Role </th>
+          <td mat-cell *matCellDef="let user">
+            <div class="action-cell">
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>Select Role</mat-label>
+                <mat-select #roleSelect [disabled]="isSubmitting() === user.id">
+                  @for (role of availableRoles; track role.code) {
+                    <mat-option [value]="role.code">{{ role.label }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+
+              <button mat-flat-button color="primary"
+                      [disabled]="!roleSelect.value || isSubmitting() === user.id"
+                      (click)="assignRole(user, roleSelect.value)">
+                {{ isSubmitting() === user.id ? 'Saving...' : 'Approve' }}
+              </button>
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+    }
+  </mat-card>
+</div>
