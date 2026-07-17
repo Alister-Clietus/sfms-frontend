@@ -1,0 +1,67 @@
+.dashboard-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.view-header {
+  margin-bottom: 24px;
+  
+  h1 {
+    font-size: 1.8rem;
+    font-weight: 500;
+    color: #1a1a1a;
+    margin: 0 0 4px 0;
+  }
+  
+  .subtitle {
+    color: #5f6368;
+    margin: 0;
+    font-size: 1rem;
+  }
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 24px;
+}
+
+.welcome-card {
+  border-radius: 8px;
+
+  .avatar-placeholder {
+    background-color: #E8F0FE;
+    color: #1967D2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    
+    mat-icon {
+      margin: 0;
+    }
+  }
+
+  mat-card-content {
+    margin-top: 16px;
+    line-height: 1.6;
+    color: #3c4043;
+  }
+}
+
+.role-tags {
+  margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  .role-tag {
+    background-color: #f1f3f4;
+    color: #3c4043;
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+}

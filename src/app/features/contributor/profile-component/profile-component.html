@@ -1,0 +1,75 @@
+<div class="profile-container">
+  <div class="view-header">
+    <h1>My Contributor Profile</h1>
+    <p class="subtitle">View your account status and historical contribution obligations.</p>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading-state">
+      <mat-icon class="spinner">autorenew</mat-icon>
+      <p>Loading profile...</p>
+    </div>
+  } @else if (error()) {
+    <div class="error-banner">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ error() }}</span>    
+    </div>
+  } @else if (profile()) {
+    <div class="profile-layout">
+      <mat-card class="summary-card mat-elevation-z2">
+        <mat-card-header>
+          <div mat-card-avatar class="avatar-placeholder">
+            <mat-icon>person</mat-icon>
+          </div>
+          <mat-card-title>{{ profile()!.displayName }}</mat-card-title>
+          <mat-card-subtitle>{{ profile()!.email }}</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content class="summary-content">
+          <div class="info-row">
+            <span class="label">Member Since:</span>
+            <span class="value">{{ profile()!.joinDate | sfmsDate:'long' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Account Status:</span>
+            <app-status-badge [status]="profile()!.status"></app-status-badge>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="obligations-card mat-elevation-z2">
+        <mat-card-header>
+          <mat-card-title>Financial Obligations</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          @if (obligations().length === 0) {
+            <div class="empty-state">
+              <mat-icon>receipt_long</mat-icon>
+              <p>No financial obligations have been generated for your account yet.</p>
+            </div>
+          } @else {
+            <table mat-table [dataSource]="obligations()" class="full-width-table">
+              
+              <ng-container matColumnDef="cycleLabel">
+                <th mat-header-cell *matHeaderCellDef> Payment Cycle </th>
+                <td mat-cell *matCellDef="let element"> <strong>{{ element.cycleLabel }}</strong> </td>
+              </ng-container>
+
+              <ng-container matColumnDef="amount">
+                <th mat-header-cell *matHeaderCellDef> Required Amount </th>
+                <td mat-cell *matCellDef="let element" class="numeric-cell"> {{ element.amount | sfmsCurrency }} </td>
+              </ng-container>
+
+              <ng-container matColumnDef="generatedAt">
+                <th mat-header-cell *matHeaderCellDef> Computed On </th>
+                <td mat-cell *matCellDef="let element" class="meta-text"> {{ element.generatedAt | sfmsDate:'short' }} </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+          }
+        </mat-card-content>
+      </mat-card>
+    </div>
+  }
+</div>
