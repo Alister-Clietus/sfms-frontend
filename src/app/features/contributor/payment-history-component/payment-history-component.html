@@ -1,0 +1,59 @@
+<div class="history-container">
+  <div class="view-header">
+    <h1>Payment History</h1>
+    <p class="subtitle">Review your past submissions and verification statuses.</p>
+    <button mat-flat-button color="primary" routerLink="/contributor/payment-submission">
+      <mat-icon>add</mat-icon> New Payment
+    </button>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading-state">
+      <mat-icon class="spinner">autorenew</mat-icon>
+      <p>Loading history...</p>
+    </div>
+  } @else if (payments().length === 0) {
+    <div class="empty-state">
+      <mat-icon>receipt_long</mat-icon>
+      <h3>No Payments Found</h3>
+      <p>You have not submitted any payments yet.</p>
+    </div>
+  } @else {
+    <div class="payment-card-list">
+      @for (payment of payments(); track payment.id) {
+        <mat-card class="payment-card mat-elevation-z1">
+          <div class="card-status-bar" [ngClass]="payment.status.toLowerCase()"></div>
+          
+          <mat-card-header>
+            <mat-card-title>{{ payment.amount | sfmsCurrency }}</mat-card-title>
+            <mat-card-subtitle>Cycle: {{ payment.cycleLabel }}</mat-card-subtitle>
+            <div class="header-badge">
+              <app-status-badge [status]="payment.status"></app-status-badge>
+            </div>
+          </mat-card-header>
+
+          <mat-card-content class="card-details">
+            <div class="detail-row">
+              <span class="label">Date:</span>
+              <span class="value">{{ payment.transactionDate | sfmsDate:'medium' }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Txn ID:</span>
+              <span class="value">{{ payment.transactionId }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Submitted:</span>
+              <span class="value text-muted">{{ payment.createdAt | sfmsDate:'short' }}</span>
+            </div>
+          </mat-card-content>
+
+          <!-- Action block bound by FR-PAY-008 logic -->
+          <mat-card-actions align="end" *ngIf="payment.status === 'PENDING_VERIFICATION'">
+            <button mat-button color="warn" (click)="withdrawPayment(payment.id)">Withdraw</button>
+            <button mat-button color="primary" (click)="editPayment(payment.id)">Edit</button>
+          </mat-card-actions>
+        </mat-card>
+      }
+    </div>
+  }
+</div>

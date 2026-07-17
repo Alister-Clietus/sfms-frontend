@@ -1,0 +1,114 @@
+/* Mobile-First Forms (RESP-007) */
+.mobile-first-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.upload-section {
+  padding: 16px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+
+  .upload-label {
+    display: block;
+    margin-bottom: 12px;
+    font-weight: 500;
+    color: #333;
+
+    .required { color: #C5221F; }
+  }
+  
+  .edit-hint {
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 8px;
+  }
+}
+
+.custom-error {
+  display: block;
+  font-size: 75%;
+  margin-top: 4px;
+  color: #f44336;
+}
+
+.form-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+
+  /* Stack vertically on mobile, side-by-side on desktop */
+  @media (min-width: 600px) {
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+  
+  button {
+    width: 100%;
+    @media (min-width: 600px) {
+      width: auto;
+    }
+  }
+}
+
+/* Payment History Cards (RESP-011) */
+.payment-card-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+
+  /* Two columns on tablet, three on desktop */
+  @media (min-width: 768px) { grid-template-columns: repeat(2, 1fr); }
+  @media (min-width: 1024px) { grid-template-columns: repeat(3, 1fr); }
+}
+
+.payment-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+
+  .card-status-bar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background-color: #ccc;
+
+    &.pending_verification { background-color: #FBBC04; }
+    &.verified { background-color: #34A853; }
+    &.rejected { background-color: #EA4335; }
+  }
+
+  mat-card-header {
+    padding-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+
+    mat-card-title {
+      font-size: 1.5rem;
+      color: #1976D2;
+      font-weight: 600;
+    }
+  }
+
+  .card-details {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+
+      .label { color: #5f6368; }
+      .value { font-weight: 500; color: #333; }
+      .text-muted { color: #888; font-weight: 400; font-size: 0.8rem; }
+    }
+  }
+}
