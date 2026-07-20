@@ -1,0 +1,66 @@
+<div class="document-viewer-container">
+  
+  <div class="viewer-header">
+    <mat-icon class="file-icon">insert_drive_file</mat-icon>
+    <span class="document-title">{{ documentTitle }}</span>
+  </div>
+
+  <!-- UI-FEED-002: Loading State -->
+  <div class="state-container loading" *ngIf="isLoading()">
+    <mat-spinner diameter="32"></mat-spinner>
+    <p>Loading preview...</p>
+  </div>
+
+  <!-- UI-FEED-003 & ERR-FE-004: Error / Access Denied State -->
+  <div class="state-container error" *ngIf="!isLoading() && errorMsg()">
+    <mat-icon color="warn">lock</mat-icon>
+    <p>{{ errorMsg() }}</p>
+  </div>
+
+  <!-- Image Preview Container (RESP-013 Compressed Thumbnail) -->
+  <div class="preview-container" *ngIf="!isLoading() && !errorMsg() && thumbnailUrl()">
+    <div class="image-wrapper">
+      <img [src]="thumbnailUrl()" alt="Document Preview" />
+    </div>
+    
+    <div class="viewer-actions">
+      <button mat-stroked-button color="primary" (click)="viewFullResolution()">
+        <mat-icon>open_in_new</mat-icon>
+        View Full Resolution
+      </button>
+    </div>
+  </div>
+
+  <!-- FR-DOC-005: Version History Panel (Admin Only) -->
+  <div class="version-history-section" *ngIf="allowVersioningView && canViewVersions() && !errorMsg()">
+    <mat-accordion>
+      <mat-expansion-panel (opened)="loadVersionsPanel()">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <mat-icon>history</mat-icon> Document Version History
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+
+        <div class="panel-loading" *ngIf="isVersionsLoading()">
+          <mat-spinner diameter="24"></mat-spinner> Loading history...
+        </div>
+
+        <div class="panel-empty" *ngIf="!isVersionsLoading() && versions().length === 0">
+          No previous versions exist for this document.
+        </div>
+
+        <mat-list *ngIf="!isVersionsLoading() && versions().length > 0">
+          <mat-list-item *ngFor="let version of versions()">
+            <mat-icon matListItemIcon>restore</mat-icon>
+            <div matListItemTitle>Version {{ version.versionNumber }}</div>
+            <div matListItemLine>Replaced on {{ version.uploadedAt | sfmsDate:'short' }} by {{ version.uploadedByDisplayName }}</div>
+            <button mat-icon-button matListItemMeta color="primary" (click)="downloadHistoricalVersion(version.id)" title="Download this version">
+              <mat-icon>download</mat-icon>
+            </button>
+          </mat-list-item>
+        </mat-list>
+      </mat-expansion-panel>
+    </mat-accordion>
+  </div>
+
+</div>

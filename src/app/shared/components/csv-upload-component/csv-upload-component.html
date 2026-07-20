@@ -1,0 +1,46 @@
+<div class="csv-upload-container">
+  <div class="upload-header">
+    <h3>{{ title }}</h3>
+  </div>
+
+  <div class="upload-controls" *ngIf="uploadResults.length === 0">
+    <input 
+      type="file" 
+      #fileInput 
+      [accept]="acceptedTypes" 
+      (change)="onFileChange($event)" 
+      class="hidden-input"
+      [disabled]="isUploading"
+    />
+    
+    <button mat-stroked-button type="button" (click)="fileInput.click()" [disabled]="isUploading">
+      <mat-icon>attach_file</mat-icon>
+      {{ selectedFile ? selectedFile.name : 'Choose File' }}
+    </button>
+
+    <button mat-flat-button color="primary" 
+            (click)="onUploadClick()" 
+            [disabled]="!selectedFile || isUploading">
+      <mat-icon>cloud_upload</mat-icon>
+      Upload
+    </button>
+  </div>
+
+  <div *ngIf="isUploading" class="progress-container">
+    <p>Processing batch import...</p>
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+  </div>
+
+  <div *ngIf="uploadResults.length > 0 && !isUploading" class="results-container">
+    <h4>Import Results</h4>
+    <div class="results-list">
+      <div *ngFor="let result of uploadResults" 
+           class="result-item" 
+           [ngClass]="{'success': result.startsWith('Success'), 'error': result.startsWith('Failed')}">
+        <mat-icon>{{ result.startsWith('Success') ? 'check_circle' : 'error' }}</mat-icon>
+        <span>{{ result }}</span>
+      </div>
+    </div>
+    <button mat-button color="primary" (click)="reset()" class="reset-btn">Upload Another File</button>
+  </div>
+</div>

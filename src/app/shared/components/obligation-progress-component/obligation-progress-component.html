@@ -1,0 +1,48 @@
+<div class="progress-container">
+  
+  <div class="summary-header">
+    <div class="summary-title">
+      <mat-icon [class.fully-paid]="progress.isFullyPaid">
+        {{ progress.isFullyPaid ? 'check_circle' : 'track_changes' }}
+      </mat-icon>
+      <h3>
+        {{ (progress.totalVerified + progress.totalPending) | sfmsCurrency }} 
+        <span class="text-muted">of {{ progress.totalObligation | sfmsCurrency }}</span>
+      </h3>
+    </div>
+    <span class="status-chip" [class.success]="progress.isFullyPaid" [class.pending]="!progress.isFullyPaid">
+      {{ progress.isFullyPaid ? 'Obligation Met' : 'In Progress' }}
+    </span>
+  </div>
+
+  <!-- Stacked Progress Bar -->
+  <div class="progress-track" aria-hidden="true">
+    <div class="progress-fill verified" [style.width.%]="verifiedPercentage"></div>
+    <div class="progress-fill pending" [style.width.%]="pendingPercentage"></div>
+  </div>
+
+  <!-- Detailed Breakdown -->
+  <div class="breakdown-grid">
+    <div class="breakdown-item">
+      <span class="dot verified-dot"></span>
+      <span class="label">Verified:</span>
+      <span class="value">{{ progress.totalVerified | sfmsCurrency }}</span>
+    </div>
+    <div class="breakdown-item">
+      <span class="dot pending-dot"></span>
+      <span class="label">Pending:</span>
+      <span class="value">{{ progress.totalPending | sfmsCurrency }}</span>
+    </div>
+    <div class="breakdown-item">
+      <span class="dot remaining-dot"></span>
+      <span class="label">Remaining:</span>
+      <span class="value remaining-value">{{ progress.remainingBalance | sfmsCurrency }}</span>
+    </div>
+  </div>
+
+  <!-- UC-01 A2: Overpayment Informational Banner -->
+  <div class="overpayment-banner" *ngIf="progress.hasOverpaid">
+    <mat-icon>info</mat-icon>
+    <span>Total submissions exceed the cycle obligation. Overpayments carry forward as a credit balance.</span>
+  </div>
+</div>

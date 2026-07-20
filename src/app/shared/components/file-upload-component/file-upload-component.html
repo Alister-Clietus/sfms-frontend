@@ -1,0 +1,59 @@
+<div class="file-upload-wrapper" [class.disabled]="disabled">
+  
+  <div class="upload-controls" *ngIf="!selectedFile()">
+    <!-- Hidden input triggers native file picker or camera -->
+    <input 
+      type="file" 
+      #fileInput 
+      [accept]="accept" 
+      [attr.capture]="capture !== 'none' ? capture : null"
+      (change)="onFileChange($event)" 
+      class="hidden-input"
+      [disabled]="disabled"
+    />
+    
+    <button 
+      mat-stroked-button 
+      color="primary"
+      class="upload-trigger-btn"
+      type="button" 
+      (click)="fileInput.click()" 
+      [disabled]="disabled">
+      <mat-icon>camera_alt</mat-icon>
+      {{ label }}
+    </button>
+    <p class="upload-hint">{{ hint }}</p>
+  </div>
+
+  <!-- Preview State -->
+  <div class="preview-container" *ngIf="selectedFile()">
+    <div class="image-preview" *ngIf="previewUrl()">
+      <img [src]="previewUrl()" alt="Document Preview" />
+    </div>
+    
+    <div class="file-details">
+      <mat-icon class="file-icon">insert_drive_file</mat-icon>
+      <div class="file-meta">
+        <span class="file-name">{{ selectedFile()!.name }}</span>
+        <span class="file-size">{{ (selectedFile()!.size / 1024 / 1024) | number:'1.2-2' }} MB</span>
+      </div>
+      <button 
+        mat-icon-button 
+        color="warn" 
+        type="button" 
+        (click)="clearFile()" 
+        [disabled]="disabled"
+        aria-label="Remove file"
+        title="Remove file">
+        <mat-icon>delete</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Error Feedback -->
+  <div class="error-message" *ngIf="errorMessage()">
+    <mat-icon>error</mat-icon>
+    <span>{{ errorMessage() }}</span>
+  </div>
+  
+</div>

@@ -1,0 +1,64 @@
+.csv-upload-container {
+  padding: 16px;
+  border: 1px dashed #ccc;
+  border-radius: 8px;
+  background-color: #fafafa;
+}
+
+.upload-header h3 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.hidden-input {
+  display: none;
+}
+
+.upload-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.progress-container {
+  margin-top: 16px;
+  p { margin-bottom: 8px; color: #555; }
+}
+
+.results-container {
+  margin-top: 16px;
+  h4 { margin-top: 0; margin-bottom: 8px; }
+  
+  .results-list {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    background: #fff;
+  }
+
+  .result-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 8px 12px;
+    border-bottom: 1px solid #eee;
+    font-size: 0.9rem;
+    
+    mat-icon {
+      font-size: 1.2rem;
+      width: 1.2rem;
+      height: 1.2rem;
+      margin-right: 8px;
+      margin-top: 2px;
+    }
+
+    &.success { color: #137333; }
+    &.error { color: #C5221F; background-color: #FCE8E6; }
+  }
+
+  .reset-btn {
+    margin-top: 12px;
+  }
+}
