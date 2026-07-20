@@ -1,0 +1,40 @@
+/* Additions for OCR States */
+.ocr-status-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background-color: #f1f3f4;
+  border-radius: 4px;
+  color: #1a73e8;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.ocr-result-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  line-height: 1.4;
+
+  mat-icon {
+    font-size: 1.2rem;
+    height: 1.2rem;
+    width: 1.2rem;
+  }
+
+  &.success {
+    background-color: #E8F0FE;
+    color: #1967D2;
+    border: 1px solid #d2e3fc;
+  }
+
+  &.error {
+    background-color: #f8f9fa;
+    color: #5f6368;
+    border: 1px solid #dadce0;
+  }
+}

@@ -8,7 +8,34 @@
     <mat-card-content>
       <form [formGroup]="paymentForm" (ngSubmit)="onSubmit()" class="mobile-first-form">
         
-        <!-- UI-FORM-001: Amount Field -->
+        <!-- UI-SCR-004: Responsive File Upload -->
+        <div class="upload-section">
+          <label class="upload-label">
+            Payment Screenshot <span class="required" *ngIf="!editModeId()">*</span>
+          </label>
+          <app-file-upload 
+            label="Capture or Upload Receipt"
+            [disabled]="isSubmitting() || isExtractingOcr()"
+            (fileSelected)="onFileSelected($event)">
+          </app-file-upload>
+          <mat-error class="custom-error" *ngIf="paymentForm.get('screenshot')?.touched && paymentForm.get('screenshot')?.hasError('required')">
+            Screenshot is required.
+          </mat-error>
+          <p class="edit-hint" *ngIf="editModeId()">Leave blank to keep your previously uploaded screenshot.</p>
+        </div>
+
+        <!-- UI-FEED-001: OCR Loading and Result State -->
+        <div class="ocr-status-container" *ngIf="isExtractingOcr()">
+          <mat-spinner diameter="24"></mat-spinner>
+          <span>Scanning receipt for details...</span>
+        </div>
+        
+        <!-- UI-SCR-005: Auto-filled visual affordance -->
+        <div class="ocr-result-banner" *ngIf="ocrMessage() && !isExtractingOcr()" [ngClass]="{'success': ocrSuccess(), 'error': !ocrSuccess()}">
+          <mat-icon>{{ ocrSuccess() ? 'auto_awesome' : 'info' }}</mat-icon>
+          <span>{{ ocrMessage() }}</span>
+        </div>
+
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Transaction Amount</mat-label>
           <input matInput type="number" formControlName="amount" min="1" step="0.01" placeholder="e.g. 1000.00">
@@ -17,7 +44,6 @@
           <mat-error *ngIf="paymentForm.get('amount')?.hasError('min')">Amount must be greater than zero.</mat-error>
         </mat-form-field>
 
-        <!-- UI-FORM-001: Transaction ID Field -->
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Bank Transaction ID (UTR)</mat-label>
           <input matInput type="text" formControlName="transactionId" placeholder="e.g. UTR123456789">
@@ -25,7 +51,6 @@
           <mat-error *ngIf="paymentForm.get('transactionId')?.hasError('minlength')">Must be at least 5 characters.</mat-error>
         </mat-form-field>
 
-        <!-- UI-FORM-001: Date Field -->
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Transaction Date</mat-label>
           <input matInput [matDatepicker]="picker" formControlName="transactionDate" [max]="today">
@@ -35,25 +60,9 @@
           <mat-error *ngIf="paymentForm.get('transactionDate')?.hasError('required')">Date is required.</mat-error>
         </mat-form-field>
 
-        <!-- UI-SCR-004: Responsive File Upload -->
-        <div class="upload-section">
-          <label class="upload-label">
-            Payment Screenshot <span class="required" *ngIf="!editModeId()">*</span>
-          </label>
-          <app-file-upload 
-            label="Capture or Upload Receipt"
-            [disabled]="isSubmitting()"
-            (fileSelected)="onFileSelected($event)">
-          </app-file-upload>
-          <mat-error class="custom-error" *ngIf="paymentForm.get('screenshot')?.touched && paymentForm.get('screenshot')?.hasError('required')">
-            Screenshot is required.
-          </mat-error>
-          <p class="edit-hint" *ngIf="editModeId()">Leave blank to keep your previously uploaded screenshot.</p>
-        </div>
-
         <div class="form-actions">
-          <button mat-button type="button" routerLink="/contributor/history" [disabled]="isSubmitting()">Cancel</button>
-          <button mat-flat-button color="primary" type="submit" [disabled]="paymentForm.invalid || isSubmitting()">
+          <button mat-button type="button" routerLink="/contributor/history" [disabled]="isSubmitting() || isExtractingOcr()">Cancel</button>
+          <button mat-flat-button color="primary" type="submit" [disabled]="paymentForm.invalid || isSubmitting() || isExtractingOcr()">
             <mat-icon>{{ isSubmitting() ? 'hourglass_empty' : 'send' }}</mat-icon>
             {{ isSubmitting() ? 'Processing...' : 'Submit Payment' }}
           </button>

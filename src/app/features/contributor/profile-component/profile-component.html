@@ -1,75 +1,55 @@
 <div class="profile-container">
   <div class="view-header">
-    <h1>My Contributor Profile</h1>
-    <p class="subtitle">View your account status and historical contribution obligations.</p>
+    <h1>My Contributor Dashboard</h1>
+    <p class="subtitle">Overview of your account status and current financial cycle progress.</p>
   </div>
 
   @if (isLoading()) {
     <div class="loading-state">
       <mat-icon class="spinner">autorenew</mat-icon>
-      <p>Loading profile...</p>
+      <p>Loading dashboard...</p>
     </div>
   } @else if (error()) {
     <div class="error-banner">
       <mat-icon>error_outline</mat-icon>
-      <span>{{ error() }}</span>    
+      <span>{{ error() }}</span>
     </div>
-  } @else if (profile()) {
+  } @else if (summary()) {
     <div class="profile-layout">
+      
+      <!-- Current Cycle Progress Widget (FR-DASH-003) -->
+      <mat-card class="progress-card mat-elevation-z2">
+        <mat-card-header>
+          <mat-card-title>Current Cycle Obligation</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="progress-content">
+          <app-obligation-progress 
+            [progress]="summary()!.currentCycleProgress">
+          </app-obligation-progress>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Profile Summary Card -->
       <mat-card class="summary-card mat-elevation-z2">
         <mat-card-header>
           <div mat-card-avatar class="avatar-placeholder">
             <mat-icon>person</mat-icon>
           </div>
-          <mat-card-title>{{ profile()!.displayName }}</mat-card-title>
-          <mat-card-subtitle>{{ profile()!.email }}</mat-card-subtitle>
+          <mat-card-title>{{ summary()!.profile.displayName }}</mat-card-title>
+          <mat-card-subtitle>{{ summary()!.profile.email }}</mat-card-subtitle>
         </mat-card-header>
         <mat-card-content class="summary-content">
           <div class="info-row">
             <span class="label">Member Since:</span>
-            <span class="value">{{ profile()!.joinDate | sfmsDate:'long' }}</span>
+            <span class="value">{{ summary()!.profile.joinDate | sfmsDate:'long' }}</span>
           </div>
           <div class="info-row">
             <span class="label">Account Status:</span>
-            <app-status-badge [status]="profile()!.status"></app-status-badge>
+            <app-status-badge [status]="summary()!.profile.status"></app-status-badge>
           </div>
         </mat-card-content>
       </mat-card>
 
-      <mat-card class="obligations-card mat-elevation-z2">
-        <mat-card-header>
-          <mat-card-title>Financial Obligations</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          @if (obligations().length === 0) {
-            <div class="empty-state">
-              <mat-icon>receipt_long</mat-icon>
-              <p>No financial obligations have been generated for your account yet.</p>
-            </div>
-          } @else {
-            <table mat-table [dataSource]="obligations()" class="full-width-table">
-              
-              <ng-container matColumnDef="cycleLabel">
-                <th mat-header-cell *matHeaderCellDef> Payment Cycle </th>
-                <td mat-cell *matCellDef="let element"> <strong>{{ element.cycleLabel }}</strong> </td>
-              </ng-container>
-
-              <ng-container matColumnDef="amount">
-                <th mat-header-cell *matHeaderCellDef> Required Amount </th>
-                <td mat-cell *matCellDef="let element" class="numeric-cell"> {{ element.amount | sfmsCurrency }} </td>
-              </ng-container>
-
-              <ng-container matColumnDef="generatedAt">
-                <th mat-header-cell *matHeaderCellDef> Computed On </th>
-                <td mat-cell *matCellDef="let element" class="meta-text"> {{ element.generatedAt | sfmsDate:'short' }} </td>
-              </ng-container>
-
-              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-            </table>
-          }
-        </mat-card-content>
-      </mat-card>
     </div>
   }
 </div>

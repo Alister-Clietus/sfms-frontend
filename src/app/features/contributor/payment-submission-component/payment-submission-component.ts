@@ -41,16 +41,18 @@ export class PaymentSubmissionComponent implements OnInit {
 
   public paymentForm: FormGroup;
   public isSubmitting = signal<boolean>(false);
+  public isExtractingOcr = signal<boolean>(false);
+  public ocrMessage = signal<string | null>(null);
+  public ocrSuccess = signal<boolean>(false);
   public editModeId = signal<string | null>(null);
   public today = new Date();
 
   constructor() {
-    // UI-FORM-001: Strict client-side validation rules
     this.paymentForm = this.fb.group({
       amount: ['', [Validators.required, Validators.min(1)]],
       transactionDate: [this.today, [Validators.required]],
       transactionId: ['', [Validators.required, Validators.minLength(5)]],
-      screenshot: [null] // Required for new submissions, optional for edits
+      screenshot: [null]
     });
   }
 
@@ -73,7 +75,6 @@ export class PaymentSubmissionComponent implements OnInit {
           this.router.navigate(['/contributor/history']);
           return;
         }
-        // Extract local date correctly without timezone shifting
         const [year, month, day] = payment.transactionDate.split('-');
         this.paymentForm.patchValue({
           amount: payment.amount,
@@ -82,7 +83,7 @@ export class PaymentSubmissionComponent implements OnInit {
         });
       },
       error: () => {
-        this.snackBar.open('Failed to load payment details.', 'Close', { duration: 3000 });
+        this.snackBar.open('Failed to load payment details.', 'Close');
         this.router.navigate(['/contributor/history']);
       }
     });
@@ -91,11 +92,51 @@ export class PaymentSubmissionComponent implements OnInit {
   public onFileSelected(file: File | null): void {
     this.paymentForm.patchValue({ screenshot: file });
     this.paymentForm.get('screenshot')?.markAsTouched();
+    
+    // Reset OCR state
+    this.ocrMessage.set(null);
+    this.ocrSuccess.set(false);
+
+    // Trigger OCR only for new valid files (FR-PAY-005)
+    if (file && !this.editModeId()) {
+      this.performOcrExtraction(file);
+    }
+  }
+
+  private performOcrExtraction(file: File): void {
+    this.isExtractingOcr.set(true);
+    
+    this.paymentService.extractOcrDetails(file).subscribe({
+      next: (response) => {
+        this.isExtractingOcr.set(false);
+        this.ocrSuccess.set(response.extractionSuccessful);
+        this.ocrMessage.set(response.message);
+
+        if (response.extractionSuccessful) {
+          const patchData: any = {};
+          if (response.suggestedAmount) patchData.amount = response.suggestedAmount;
+          if (response.suggestedTransactionId) patchData.transactionId = response.suggestedTransactionId;
+          if (response.suggestedDate) {
+             const [year, month, day] = response.suggestedDate.split('-');
+             patchData.transactionDate = new Date(+year, +month - 1, +day);
+          }
+          
+          // Pre-fill form fields (UI-SCR-005) - requires manual submission by user
+          this.paymentForm.patchValue(patchData);
+          this.paymentForm.markAsDirty();
+        }
+      },
+      error: () => {
+        // UC-01 A1: Graceful fallback. We just stop extracting and let the user type manually.
+        this.isExtractingOcr.set(false);
+        this.ocrSuccess.set(false);
+        this.ocrMessage.set("Auto-extraction unavailable. Please enter details manually.");
+      }
+    });
   }
 
   public onSubmit(): void {
     if (this.paymentForm.invalid) return;
-
     this.isSubmitting.set(true);
 
     const formDate: Date = this.paymentForm.value.transactionDate;
@@ -108,20 +149,28 @@ export class PaymentSubmissionComponent implements OnInit {
       screenshot: this.paymentForm.value.screenshot || undefined
     };
 
-    const submitObs = this.editModeId() 
-      ? this.paymentService.editPayment(this.editModeId()!, request)
-      : this.paymentService.submitPayment(request);
+    if (this.editModeId()) {
+      this.paymentService.editPayment(this.editModeId()!, request).subscribe({
+        next: () => {
+          this.snackBar.open('Payment updated successfully.', 'Success', { duration: 3000 });
+          this.router.navigate(['/contributor/history']);
+        },
+        error: (err) => this.handleError(err)
+      });
+    } else {
+      this.paymentService.submitPayment(request).subscribe({
+        next: (response) => {
+          // Utilizes the backend's tailored message containing the UC-01 A2 overpayment warning if applicable
+          this.snackBar.open(response.message || 'Payment submitted successfully.', 'Close', { duration: 5000 });
+          this.router.navigate(['/contributor/history']);
+        },
+        error: (err) => this.handleError(err)
+      });
+    }
+  }
 
-    submitObs.subscribe({
-      next: () => {
-        const msg = this.editModeId() ? 'Payment updated successfully.' : 'Payment submitted for verification.';
-        this.snackBar.open(msg, 'Success', { duration: 3000 });
-        this.router.navigate(['/contributor/history']);
-      },
-      error: (err) => {
-        this.snackBar.open(err?.error?.message || 'Submission failed. Please check your data.', 'Close', { duration: 5000, panelClass: ['error-snackbar'] });
-        this.isSubmitting.set(false);
-      }
-    });
+  private handleError(err: any): void {
+    this.snackBar.open(err?.error?.message || 'Submission failed. Please check your data.', 'Close', { duration: 5000, panelClass: ['error-snackbar'] });
+    this.isSubmitting.set(false);
   }
 }
